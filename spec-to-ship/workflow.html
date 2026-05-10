@@ -392,6 +392,116 @@
     color: var(--muted);
     font-size: 11px;
   }
+  .spec-preview {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .spec-preview-head {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .spec-preview-body {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    min-height: 210px;
+  }
+  .spec-preview-nav {
+    border-right: 1px solid var(--border);
+    padding: 10px;
+    display: grid;
+    align-content: start;
+    gap: 7px;
+    background: var(--bg-2);
+  }
+  .spec-nav-item {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--bg-4);
+  }
+  .spec-nav-item.active {
+    width: 82%;
+    background: var(--blue);
+  }
+  .spec-preview-page {
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+  }
+  .spec-preview-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--fg);
+  }
+  .spec-tabs {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .spec-tab {
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+  }
+  .spec-tab.active {
+    color: var(--blue);
+    border-color: rgba(79,142,255,0.45);
+    background: var(--blue-dim);
+  }
+  .spec-diagram {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .spec-node {
+    min-height: 58px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    background: var(--bg-2);
+  }
+  .spec-node strong {
+    display: block;
+    font-size: 10px;
+    color: var(--fg);
+    margin-bottom: 5px;
+  }
+  .spec-node span {
+    display: block;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--bg-4);
+    margin-top: 5px;
+  }
+  .spec-node.blue { border-color: rgba(79,142,255,0.35); }
+  .spec-node.green { border-color: rgba(78,201,176,0.35); }
+  .spec-node.amber { border-color: rgba(212,167,44,0.35); }
+  .spec-state-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .spec-state {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 6px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    background: var(--bg-2);
+    text-align: center;
+  }
   .stack {
     display: grid;
     gap: 8px;
@@ -570,6 +680,13 @@
     .step { grid-template-columns: 38px minmax(0, 1fr); gap: 12px; }
     .step-dot { width: 36px; height: 36px; font-size: 11px; }
     .step-copy, .step-visual { padding: 14px; }
+    .spec-preview-body { grid-template-columns: 1fr; }
+    .spec-preview-nav {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-diagram, .spec-state-strip { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -653,13 +770,34 @@
                 <div class="step-pills"><span class="pill blue">skill</span><span class="pill">artifact first</span></div>
               </div>
               <div class="step-visual">
-                <div class="mini-doc">
-                  <div class="mini-doc-head"><span class="mini-dot"></span><span class="mini-dot"></span><span class="mini-dot"></span> docs/specs/FutureThing.html</div>
-                  <div class="mini-doc-body">
-                    <div class="mini-line mid"></div>
-                    <div class="mini-line"></div>
-                    <div class="mini-card"><strong>States</strong><span>ready · stale · accepted · failed</span></div>
-                    <div class="mini-card"><strong>Invariant</strong><span>Main changes only after explicit accept.</span></div>
+                <div class="spec-preview">
+                  <div class="spec-preview-head"><span class="mini-dot"></span><span class="mini-dot"></span><span class="mini-dot"></span> docs/specs/VisualSpec.html</div>
+                  <div class="spec-preview-body">
+                    <div class="spec-preview-nav">
+                      <div class="spec-nav-item active"></div>
+                      <div class="spec-nav-item"></div>
+                      <div class="spec-nav-item"></div>
+                      <div class="spec-nav-item"></div>
+                    </div>
+                    <div class="spec-preview-page">
+                      <div class="spec-preview-title">Visual HTML Spec</div>
+                      <div class="spec-tabs">
+                        <span class="spec-tab active">flow</span>
+                        <span class="spec-tab">states</span>
+                        <span class="spec-tab">tests</span>
+                      </div>
+                      <div class="spec-diagram">
+                        <div class="spec-node blue"><strong>Idea</strong><span></span><span></span></div>
+                        <div class="spec-node amber"><strong>Behavior</strong><span></span><span></span></div>
+                        <div class="spec-node green"><strong>Tests</strong><span></span><span></span></div>
+                      </div>
+                      <div class="spec-state-strip">
+                        <div class="spec-state">empty</div>
+                        <div class="spec-state">ready</div>
+                        <div class="spec-state">conflict</div>
+                        <div class="spec-state">done</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -832,10 +970,10 @@
           <div class="step-card">
             <div class="step-main">
               <div class="step-copy">
-                <div class="step-kicker">code review</div>
-                <div class="step-title">Review for bugs and regressions</div>
+                <div class="step-kicker">/code review</div>
+                <div class="step-title">Run /code review for bugs and regressions</div>
                 <p class="step-text">Codex reviews the diff against the approved spec and tests. Findings lead, and actionable issues are fixed before simplification.</p>
-                <div class="step-pills"><span class="pill red">review</span><span class="pill">risk check</span></div>
+                <div class="step-pills"><span class="pill red">/code review</span><span class="pill">risk check</span></div>
               </div>
               <div class="step-visual">
                 <div class="stack">
