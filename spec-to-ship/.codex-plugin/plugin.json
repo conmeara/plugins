@@ -1,0 +1,35 @@
+{
+  "name": "spec-to-ship",
+  "version": "0.1.0",
+  "description": "A personal Codex workflow for taking implementation ideas from HTML spec through tests, implementation, review, simplification, and push.",
+  "author": {
+    "name": "Conmeara"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "html-spec",
+    "tdd",
+    "code-review",
+    "simplification",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Spec to Ship",
+    "shortDescription": "/html-spec, /build-tests, /simplify",
+    "longDescription": "A personal development workflow plugin built around /html-spec, /build-tests, and /simplify. It starts with an HTML spec, uses Codex annotations for review, creates tests before implementation, verifies red/green progress with goals, pauses for human QA, performs Codex code review, simplifies the result, then commits and pushes.",
+    "developerName": "Conmeara",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Use /html-spec to turn this idea into an HTML spec.",
+      "Use /build-tests to create tests from the approved spec.",
+      "Use /simplify after review to clean up the implementation."
+    ],
+    "brandColor": "#4F8EFF"
+  }
+}

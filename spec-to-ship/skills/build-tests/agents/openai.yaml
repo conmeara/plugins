@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Tests"
+  short_description: "Create the red test contract"
+  default_prompt: "Use $build-tests to create failing tests from this HTML spec."

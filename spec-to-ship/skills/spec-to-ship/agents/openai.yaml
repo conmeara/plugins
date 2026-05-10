@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec To Ship"
+  short_description: "HTML spec to tests, code, review, simplify, push"
+  default_prompt: "Use $spec-to-ship to take this feature from HTML spec to pushed commit."

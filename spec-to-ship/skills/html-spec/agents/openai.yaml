@@ -1,0 +1,4 @@
+interface:
+  display_name: "HTML Spec"
+  short_description: "Create visual HTML implementation specs"
+  default_prompt: "Use /html-spec to turn this implementation idea into a visual HTML spec."

@@ -1,0 +1,20 @@
+{
+  "name": "conmeara-local",
+  "interface": {
+    "displayName": "Conmeara Local"
+  },
+  "plugins": [
+    {
+      "name": "spec-to-ship",
+      "source": {
+        "source": "local",
+        "path": "./plugins/spec-to-ship"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
