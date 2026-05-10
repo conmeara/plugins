@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spec to Ship Workflow</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #151515;
+    --bg-2: #1b1b1b;
+    --bg-3: #222;
+    --bg-4: #2a2a2a;
+    --border: #303030;
+    --border-2: #3d3d3d;
+    --fg: #ededed;
+    --muted: #aaa;
+    --dim: #707070;
+    --blue: #4f8eff;
+    --blue-dim: rgba(79, 142, 255, 0.13);
+    --green: #4ec9b0;
+    --green-dim: rgba(78, 201, 176, 0.13);
+    --amber: #d4a72c;
+    --amber-dim: rgba(212, 167, 44, 0.13);
+    --red: #f48771;
+    --red-dim: rgba(244, 135, 113, 0.13);
+    --radius: 8px;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration-color: var(--border-2); text-underline-offset: 3px; }
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg);
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .shell {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+  .side {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: auto;
+    padding: 22px 14px;
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 4px 18px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: var(--blue-dim);
+    border: 1px solid rgba(79, 142, 255, 0.38);
+    color: var(--blue);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+  .brand-title { font-size: 13px; font-weight: 650; }
+  .brand-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 12px 8px 5px;
+  }
+  .nav-link {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 28px;
+    padding: 5px 8px;
+    color: var(--muted);
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 12px;
+  }
+  .nav-link:hover, .nav-link.active { background: var(--bg-3); color: var(--fg); }
+  .nav-num {
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    width: 18px;
+  }
+  main {
+    min-width: 0;
+    padding: 44px 56px 72px;
+  }
+  .topline {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+  h1 {
+    margin: 0 0 10px;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    max-width: 720px;
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 0 22px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    color: var(--dim);
+    font-size: 12px;
+    margin-bottom: 26px;
+  }
+  .meta strong { color: var(--muted); font-weight: 600; }
+  section { scroll-margin-top: 28px; margin-top: 54px; }
+  h2 {
+    margin: 0 0 8px;
+    font-size: 19px;
+    letter-spacing: -0.005em;
+  }
+  .section-copy {
+    max-width: 760px;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+
+  .command-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0 26px;
+  }
+  .command {
+    background: var(--bg-2);
+    padding: 16px;
+    min-width: 0;
+  }
+  .command-name {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--fg);
+    margin-bottom: 6px;
+  }
+  .command-desc {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .workflow-board {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-2);
+    overflow: hidden;
+  }
+  .board-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .board-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .board-note {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+  .phase {
+    appearance: none;
+    border: 0;
+    min-height: 154px;
+    padding: 14px;
+    text-align: left;
+    color: var(--muted);
+    background: var(--bg-2);
+    cursor: pointer;
+    font: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .phase:hover { background: var(--bg-3); }
+  .phase.active {
+    background: var(--blue-dim);
+    box-shadow: inset 0 0 0 1px rgba(79, 142, 255, 0.46);
+  }
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+  .phase-name {
+    color: var(--fg);
+    font-weight: 650;
+    line-height: 1.25;
+  }
+  .phase-desc {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: auto;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    padding: 2px 7px;
+  }
+  .tag.command-tag { color: var(--blue); border-color: rgba(79,142,255,0.35); background: var(--blue-dim); }
+  .tag.human { color: var(--amber); border-color: rgba(212,167,44,0.36); background: var(--amber-dim); }
+  .tag.goal { color: var(--green); border-color: rgba(78,201,176,0.35); background: var(--green-dim); }
+
+  .detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+  }
+  .detail-pane {
+    background: var(--bg-2);
+    padding: 18px;
+    min-width: 0;
+  }
+  .detail-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+  .detail-title {
+    font-size: 18px;
+    color: var(--fg);
+    font-weight: 650;
+    margin-bottom: 7px;
+  }
+  .detail-body {
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .detail-list {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--muted);
+  }
+  .detail-list li { margin: 5px 0; }
+  .output-list {
+    display: grid;
+    gap: 8px;
+  }
+  .output {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: var(--bg);
+  }
+  .output strong {
+    display: block;
+    color: var(--fg);
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+  .output span {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .lane-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lane {
+    background: var(--bg-2);
+    padding: 16px;
+  }
+  .lane h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--fg);
+  }
+  .lane p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .line {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+  .line-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    padding-top: 2px;
+  }
+  .line-value {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .gate-list {
+    display: grid;
+    gap: 10px;
+  }
+  .gate {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--amber);
+    border-radius: 6px;
+    padding: 12px;
+    background: var(--bg-2);
+  }
+  .gate.goal-gate { border-left-color: var(--green); }
+  .gate.review-gate { border-left-color: var(--blue); }
+  .gate-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--fg);
+  }
+  .gate-copy {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .artifact-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-2);
+  }
+  .artifact-table th,
+  .artifact-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .artifact-table tr:last-child td { border-bottom: 0; }
+  .artifact-table th {
+    font-family: var(--mono);
+    color: var(--dim);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--bg);
+  }
+  .artifact-table td {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .artifact-table td:first-child {
+    color: var(--fg);
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+  .footer {
+    border-top: 1px solid var(--border);
+    margin-top: 58px;
+    padding-top: 18px;
+    color: var(--dim);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  @media (max-width: 1180px) {
+    .phase-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+    .detail { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 820px) {
+    .shell { grid-template-columns: 1fr; }
+    .side {
+      position: relative;
+      height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    main { padding: 30px 18px 52px; }
+    .command-strip, .lane-grid { grid-template-columns: 1fr; }
+    .phase-grid { grid-template-columns: 1fr; }
+    .board-head { flex-direction: column; }
+    .gate { grid-template-columns: 1fr; }
+    .artifact-table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">S</div>
+      <div>
+        <div class="brand-title">Spec to Ship</div>
+        <div class="brand-sub">workflow visual</div>
+      </div>
+    </div>
+    <div class="nav-label">Map</div>
+    <a class="nav-link active" href="#overview"><span class="nav-num">01</span>Overview</a>
+    <a class="nav-link" href="#workflow"><span class="nav-num">02</span>Workflow Board</a>
+    <a class="nav-link" href="#gates"><span class="nav-num">03</span>Gates</a>
+    <a class="nav-link" href="#artifacts"><span class="nav-num">04</span>Artifacts</a>
+    <a class="nav-link" href="#lanes"><span class="nav-num">05</span>Operating Lanes</a>
+  </aside>
+
+  <main>
+    <section id="overview" style="margin-top:0">
+      <div class="topline">Plugin · spec-to-ship</div>
+      <h1>Spec to Ship</h1>
+      <p class="lede">A visual map of the development loop: make the idea legible, turn it into tests, implement against those tests, let the human verify the app, review the code, simplify the result, then ship.</p>
+      <div class="meta">
+        <div><strong>Primary commands:</strong> /html-spec · /build-tests · /simplify</div>
+        <div><strong>Human gates:</strong> spec review · test QA · app QA</div>
+        <div><strong>Goal gates:</strong> verify red · implement to green</div>
+      </div>
+
+      <div class="command-strip" aria-label="Workflow commands">
+        <div class="command">
+          <div class="command-name">/html-spec</div>
+          <div class="command-desc">Create the visual implementation artifact before production code or tests begin.</div>
+        </div>
+        <div class="command">
+          <div class="command-name">/build-tests</div>
+          <div class="command-desc">Translate the approved spec into an executable red test contract, then stop.</div>
+        </div>
+        <div class="command">
+          <div class="command-name">/simplify</div>
+          <div class="command-desc">After green tests and review, reduce complexity while preserving behavior exactly.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <h2>Workflow Board</h2>
+      <p class="section-copy">Click a phase to inspect what starts it, what happens there, and what artifact it produces. The board is intentionally sequential: each gate protects the next phase from starting on shaky ground.</p>
+
+      <div class="workflow-board">
+        <div class="board-head">
+          <div class="board-title">Spec-first implementation loop</div>
+          <div class="board-note">click phases · preserve gates · ship clean</div>
+        </div>
+        <div class="phase-grid" id="phaseGrid"></div>
+        <div class="detail" aria-live="polite">
+          <div class="detail-pane">
+            <div class="detail-label" id="detailStage">Phase</div>
+            <div class="detail-title" id="detailTitle">HTML Spec</div>
+            <p class="detail-body" id="detailBody"></p>
+            <ul class="detail-list" id="detailActions"></ul>
+          </div>
+          <div class="detail-pane">
+            <div class="detail-label">Outputs</div>
+            <div class="output-list" id="detailOutputs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gates">
+      <h2>Gates</h2>
+      <p class="section-copy">These are the stop signs in the process. They keep Codex from racing ahead before the artifact, tests, or app behavior has been checked.</p>
+      <div class="gate-list">
+        <div class="gate review-gate">
+          <div class="gate-key">review</div>
+          <div class="gate-copy">The HTML spec is discussed in depth with Codex annotations and direct edits until the user says it is ready for tests.</div>
+        </div>
+        <div class="gate">
+          <div class="gate-key">human QA</div>
+          <div class="gate-copy">The user checks the spec and test contract manually before implementation begins.</div>
+        </div>
+        <div class="gate goal-gate">
+          <div class="gate-key">/goal red</div>
+          <div class="gate-copy">Codex verifies tests fail for the right reason: missing implementation, not broken test setup.</div>
+        </div>
+        <div class="gate goal-gate">
+          <div class="gate-key">/goal green</div>
+          <div class="gate-copy">Codex implements the approved spec until the focused and relevant broader tests pass.</div>
+        </div>
+        <div class="gate">
+          <div class="gate-key">app QA</div>
+          <div class="gate-copy">The user tests the running app themselves. Automated tests do not replace this gate.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="artifacts">
+      <h2>Artifacts</h2>
+      <p class="section-copy">Each phase leaves behind a concrete object. The repo should make it easy for a later agent to reconstruct what happened and why.</p>
+      <table class="artifact-table">
+        <thead>
+          <tr>
+            <th>Artifact</th>
+            <th>Produced By</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>HTML spec</td>
+            <td>/html-spec</td>
+            <td>Visible implementation model, diagrams, states, invariants, open questions, and test contract.</td>
+          </tr>
+          <tr>
+            <td>Review edits</td>
+            <td>Codex annotations</td>
+            <td>User feedback made concrete before tests or code start.</td>
+          </tr>
+          <tr>
+            <td>Red tests</td>
+            <td>/build-tests</td>
+            <td>Executable proof of the approved spec's expected behavior.</td>
+          </tr>
+          <tr>
+            <td>Implementation</td>
+            <td>/goal green</td>
+            <td>Code changed only enough to satisfy the spec and pass verification.</td>
+          </tr>
+          <tr>
+            <td>Review findings</td>
+            <td>Codex review</td>
+            <td>Bugs, regressions, missing tests, and risks resolved before cleanup.</td>
+          </tr>
+          <tr>
+            <td>Simplified diff</td>
+            <td>/simplify</td>
+            <td>Cleaner code with the same externally observable behavior.</td>
+          </tr>
+          <tr>
+            <td>Commit and push</td>
+            <td>ship</td>
+            <td>Final verified result on the remote branch.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="lanes">
+      <h2>Operating Lanes</h2>
+      <p class="section-copy">The workflow has three modes of attention. Good runs keep them separate instead of turning everything into implementation work.</p>
+      <div class="lane-grid">
+        <div class="lane">
+          <h3>Thinking Artifacts</h3>
+          <p>HTML specs and annotations make intent visible before code. This is where ambiguous product, prompt, data, or engine behavior becomes discussable.</p>
+          <div class="line">
+            <div class="line-label">command</div>
+            <div class="line-value"><code>/html-spec</code></div>
+          </div>
+        </div>
+        <div class="lane">
+          <h3>Executable Contract</h3>
+          <p>Tests translate the approved spec into red checks. The red phase must fail for the right reason before implementation starts.</p>
+          <div class="line">
+            <div class="line-label">command</div>
+            <div class="line-value"><code>/build-tests</code> plus <code>/goal red</code></div>
+          </div>
+        </div>
+        <div class="lane">
+          <h3>Production Code</h3>
+          <p>Implementation, review, simplification, and push happen after the contract is clear and the user has checked the important moments.</p>
+          <div class="line">
+            <div class="line-label">command</div>
+            <div class="line-value"><code>/goal green</code> plus <code>/simplify</code></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">Spec to Ship · public plugin workflow visual</div>
+  </main>
+</div>
+
+<script>
+  const phases = [
+    {
+      name: "HTML Spec",
+      tags: ["command", "artifact"],
+      command: "/html-spec",
+      desc: "Make the future implementation visible before tests or code.",
+      body: "Build a self-contained HTML artifact that shows the proposed behavior or system: UI, prompt stack, schema, engine, agent workflow, or architecture.",
+      actions: [
+        "Inspect the repo and existing conventions.",
+        "Create diagrams, states, invariants, and decision points.",
+        "Keep unknowns and open questions visible."
+      ],
+      outputs: [
+        ["Spec file", "A browser-openable HTML artifact in the repo."],
+        ["Shared model", "A thing the user and agent can point at while discussing the change."]
+      ]
+    },
+    {
+      name: "Review In Depth",
+      tags: ["human", "review"],
+      command: "annotations",
+      desc: "Use the spec as the discussion surface.",
+      body: "The user reviews the artifact with Codex annotations and conversation. The agent updates the spec until the behavior and implementation contract are clear.",
+      actions: [
+        "Resolve contradictions and vague states.",
+        "Add missing flows, edge cases, and non-goals.",
+        "Do not start tests until the user says the spec is ready."
+      ],
+      outputs: [
+        ["Approved spec", "The HTML spec is clear enough to become a test plan."],
+        ["Review notes", "Important decisions are captured in the artifact."]
+      ]
+    },
+    {
+      name: "Build Tests",
+      tags: ["command", "red"],
+      command: "/build-tests",
+      desc: "Turn the approved spec into failing tests.",
+      body: "Build the executable contract. Tests should fail because the implementation does not exist yet, not because the test setup is broken.",
+      actions: [
+        "Translate claims and invariants into tests.",
+        "Use the repo's existing test patterns.",
+        "Run focused tests and verify meaningful red failures."
+      ],
+      outputs: [
+        ["Red tests", "Focused tests that describe the expected behavior."],
+        ["Failure summary", "A short report explaining why the red failures are expected."]
+      ]
+    },
+    {
+      name: "Human Test QA",
+      tags: ["human", "gate"],
+      command: "pause",
+      desc: "The user checks the spec and test contract.",
+      body: "The agent stops. The user reads the tests against the spec and decides whether the contract is right before implementation begins.",
+      actions: [
+        "Wait for explicit approval or requested edits.",
+        "Fix test mistakes before production changes.",
+        "Return to the spec when behavior changes."
+      ],
+      outputs: [
+        ["QA decision", "Proceed, revise tests, or revise spec."],
+        ["Stable contract", "Implementation has a clear target."]
+      ]
+    },
+    {
+      name: "Goal Red",
+      tags: ["goal", "red"],
+      command: "/goal",
+      desc: "Prove the tests fail for the right reason.",
+      body: "Use a Codex goal to verify red. This is a gate, not implementation. The output should explain which tests fail and why.",
+      actions: [
+        "Run the focused suite.",
+        "Fix harness mistakes only.",
+        "Do not implement the feature here."
+      ],
+      outputs: [
+        ["Red proof", "Failures are tied to missing implementation."],
+        ["Ready signal", "The green goal can now begin."]
+      ]
+    },
+    {
+      name: "Goal Green",
+      tags: ["goal", "code"],
+      command: "/goal",
+      desc: "Implement the approved spec until tests pass.",
+      body: "Use the spec and tests as the completion contract. Scope changes tightly to the approved behavior and run broader checks when shared systems are touched.",
+      actions: [
+        "Implement to satisfy the spec, not extra ideas.",
+        "Run focused tests repeatedly.",
+        "Run broader relevant verification before stopping."
+      ],
+      outputs: [
+        ["Passing tests", "The contract is green."],
+        ["Implemented feature", "Production code matches the approved spec."]
+      ]
+    },
+    {
+      name: "Human App QA",
+      tags: ["human", "gate"],
+      command: "manual",
+      desc: "The user tests the running app.",
+      body: "Automated tests are not the finish line. The user exercises the app or runtime directly, then reports issues or approves the behavior.",
+      actions: [
+        "Launch or point to the right app surface.",
+        "Let the user test the real flow.",
+        "Return to spec, tests, or code if issues appear."
+      ],
+      outputs: [
+        ["App QA result", "Approved, blocked, or needs another loop."],
+        ["Runtime confidence", "The behavior works where the user experiences it."]
+      ]
+    },
+    {
+      name: "Codex Review",
+      tags: ["review", "risk"],
+      command: "review",
+      desc: "Look for bugs before cleanup.",
+      body: "Run a review pass focused on correctness, regressions, missing tests, scope creep, and risky behavior. Findings come before summary.",
+      actions: [
+        "Inspect staged, unstaged, and untracked changes.",
+        "Compare diff against the approved spec.",
+        "Fix actionable review findings before simplifying."
+      ],
+      outputs: [
+        ["Review findings", "Resolved issues or explicit accepted risk."],
+        ["Cleaner target", "Simplification starts from working reviewed code."]
+      ]
+    },
+    {
+      name: "Simplify",
+      tags: ["command", "cleanup"],
+      command: "/simplify",
+      desc: "Reduce complexity without changing behavior.",
+      body: "Simplify after behavior works and tests pass. The tests from the spec remain the contract while code gets clearer.",
+      actions: [
+        "Preserve observable behavior exactly.",
+        "Prefer local conventions and clarity.",
+        "Run tests again after simplification."
+      ],
+      outputs: [
+        ["Simplified diff", "Easier code with the same behavior."],
+        ["Verification", "Tests still pass after cleanup."]
+      ]
+    },
+    {
+      name: "Commit And Push",
+      tags: ["ship", "remote"],
+      command: "git",
+      desc: "Ship only after the gates are satisfied.",
+      body: "Commit and push the final state after spec review, tests, app QA, code review, and simplification have all cleared or been explicitly waived.",
+      actions: [
+        "Commit an intentional scope.",
+        "Push the branch.",
+        "Report commit hash, branch, and remote URL."
+      ],
+      outputs: [
+        ["Commit", "A named version of the completed work."],
+        ["Remote", "The branch is available for sharing or review."]
+      ]
+    }
+  ];
+
+  const grid = document.getElementById("phaseGrid");
+  const stage = document.getElementById("detailStage");
+  const title = document.getElementById("detailTitle");
+  const body = document.getElementById("detailBody");
+  const actions = document.getElementById("detailActions");
+  const outputs = document.getElementById("detailOutputs");
+
+  function tagClass(tag) {
+    if (tag === "command") return "command-tag";
+    if (tag === "human") return "human";
+    if (tag === "goal") return "goal";
+    return "";
+  }
+
+  function renderDetail(index) {
+    const phase = phases[index];
+    document.querySelectorAll(".phase").forEach((button, buttonIndex) => {
+      button.classList.toggle("active", buttonIndex === index);
+    });
+    stage.textContent = `Phase ${String(index + 1).padStart(2, "0")} · ${phase.command}`;
+    title.textContent = phase.name;
+    body.textContent = phase.body;
+    actions.innerHTML = phase.actions.map(item => `<li>${item}</li>`).join("");
+    outputs.innerHTML = phase.outputs.map(([name, text]) => (
+      `<div class="output"><strong>${name}</strong><span>${text}</span></div>`
+    )).join("");
+  }
+
+  phases.forEach((phase, index) => {
+    const button = document.createElement("button");
+    button.className = "phase";
+    button.type = "button";
+    button.innerHTML = `
+      <div class="phase-num">${String(index + 1).padStart(2, "0")}</div>
+      <div class="phase-name">${phase.name}</div>
+      <div class="phase-desc">${phase.desc}</div>
+      <div class="tag-row">
+        ${phase.tags.map(tag => `<span class="tag ${tagClass(tag)}">${tag}</span>`).join("")}
+      </div>
+    `;
+    button.addEventListener("click", () => renderDetail(index));
+    grid.appendChild(button);
+  });
+
+  document.querySelectorAll(".nav-link").forEach(link => {
+    link.addEventListener("click", () => {
+      document.querySelectorAll(".nav-link").forEach(item => item.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+
+  renderDetail(0);
+</script>
+</body>
+</html>

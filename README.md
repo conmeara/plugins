@@ -18,6 +18,12 @@ Personal Codex plugins and workflow skills.
 8. `/simplify` to clean up without changing behavior.
 9. Commit and push.
 
+Open the visual workflow map:
+
+```text
+spec-to-ship/workflow.html
+```
+
 The plugin lives at:
 
 ```text
